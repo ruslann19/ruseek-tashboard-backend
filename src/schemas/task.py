@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 
 ON_VALIDATION_STATE = "on validation"
 QUEUE_STATE = "queue"
@@ -6,28 +6,28 @@ BENCHMARK_STATE = "benchmark"
 ARCHIVE_STATE = "archive"
 
 
-class TaskCreateSchema(BaseModel):
+class TaskCreateCoreSchema(BaseModel):
     question: str
     correct_answer: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class TaskCreateSchema(TaskCreateCoreSchema):
     state: str = QUEUE_STATE
-    source_url: str | None = None
-    benchmark_version: int | None = None
+    benchmark_version: int | None = Field(default=None, examples=[None])
 
 
 class TaskReadSchema(TaskCreateSchema):
-    task_id: int
+    id: int
 
 
 class TaskUpdateSchema(BaseModel):
     # обязательный параметр
-    task_id: int
+    id: int
+
     # необязательные параметры
-    question: str | None = None
-    correct_answer: str | None = None
-    state: str | None = None
-    source_url: str | None = None
-    benchmark_version: int | None = None
-
-
-class TaskDeleteSchema(BaseModel):
-    deleted: bool
+    question: str | None = Field(default=None, examples=[None])
+    correct_answer: str | None = Field(default=None, examples=[None])
+    state: str | None = Field(default=None, examples=[None])
+    benchmark_version: int | None = Field(default=None, examples=[None])
