@@ -24,7 +24,7 @@ async def get_llm_service(repository: LLMRepository = Depends(get_llm_repository
 @router.post(
     "/",
     response_model=LLMReadSchema,
-    summary="Добавить LLM",
+    summary="Создать новую LLM",
 )
 async def create_llm(
     llm: LLMCreateSchema,
@@ -42,7 +42,7 @@ async def create_llm(
 @router.get(
     "/",
     response_model=list[LLMReadSchema],
-    summary="Список всех LLM",
+    summary="Получить все LLM",
 )
 async def get_llms(
     llm_service: LLMService = Depends(get_llm_service),
@@ -53,7 +53,7 @@ async def get_llms(
 @router.get(
     "/{llm_id}",
     response_model=LLMReadSchema,
-    summary="Данные одной LLM",
+    summary="Получить конкретную LLM по ID",
 )
 async def get_llm(
     llm_id: int,
@@ -71,7 +71,7 @@ async def get_llm(
 @router.put(
     "/{llm_id}",
     status_code=status.HTTP_204_NO_CONTENT,
-    summary="Обновить данные одной LLM",
+    summary="Обновить конкретную LLM по ID",
 )
 async def update_llm(
     llm_data_for_update: LLMUpdateSchema,
@@ -83,7 +83,7 @@ async def update_llm(
 @router.delete(
     "/{llm_id}",
     status_code=status.HTTP_204_NO_CONTENT,
-    summary="Удалить одну LLM",
+    summary="Удалить конкретную LLM по ID",
 )
 async def delete_llm(
     llm_id: int,

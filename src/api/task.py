@@ -25,8 +25,11 @@ async def get_task_service(repository: TaskRepository = Depends(get_task_reposit
     return TaskServise(repository, repository.session)
 
 
-# Создать новую задачу
-@router.post("/", response_model=TaskReadSchema)
+@router.post(
+    "/",
+    response_model=TaskReadSchema,
+    summary="Создать новую задачу",
+)
 async def create_task(
     task: TaskCreateCoreSchema,
     task_service: TaskServise = Depends(get_task_service),
@@ -34,16 +37,22 @@ async def create_task(
     return await task_service.add_task(task)
 
 
-# Получить все задачи
-@router.get("/", response_model=list[TaskReadSchema])
+@router.get(
+    "/",
+    response_model=list[TaskReadSchema],
+    summary="Получить все задачи",
+)
 async def get_tasks(
     task_service: TaskServise = Depends(get_task_service),
 ):
     return await task_service.get_all_tasks()
 
 
-# Получить конкретную задачу по ID
-@router.get("/{task_id}", response_model=TaskReadSchema)
+@router.get(
+    "/{task_id}",
+    response_model=TaskReadSchema,
+    summary="Получить конкретную задачу по ID",
+)
 async def get_task(
     task_id: int,
     task_service: TaskServise = Depends(get_task_service),
@@ -58,7 +67,11 @@ async def get_task(
         )
 
 
-@router.put("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.put(
+    "/{task_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Обновить конкретную задачу по ID",
+)
 async def update_task(
     task_for_update: TaskUpdateSchema,
     task_service: TaskServise = Depends(get_task_service),
@@ -66,7 +79,11 @@ async def update_task(
     await task_service.update_task(task_for_update)
 
 
-@router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{task_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Удалить конкретную задачу по ID",
+)
 async def delete_task(
     task_id: int,
     task_service: TaskServise = Depends(get_task_service),
