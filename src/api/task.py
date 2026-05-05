@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from db.session import get_session
+from db.session import get_async_session
 from repositories import TaskRepository
 from schemas.task import (
     TaskCreateCoreSchema,
@@ -17,11 +17,11 @@ router = APIRouter(
 )
 
 
-def get_task_repository(session: Session = Depends(get_session)):
+async def get_task_repository(session: AsyncSession = Depends(get_async_session)):
     return TaskRepository(session)
 
 
-def get_task_service(repository: TaskRepository = Depends(get_task_repository)):
+async def get_task_service(repository: TaskRepository = Depends(get_task_repository)):
     return TaskServise(repository, repository.session)
 
 
@@ -31,7 +31,7 @@ async def create_task(
     task: TaskCreateCoreSchema,
     task_service: TaskServise = Depends(get_task_service),
 ):
-    return task_service.add_task(task)
+    return await task_service.add_task(task)
 
 
 # Получить все задачи
@@ -39,7 +39,7 @@ async def create_task(
 async def get_tasks(
     task_service: TaskServise = Depends(get_task_service),
 ):
-    return task_service.get_all_tasks()
+    return await task_service.get_all_tasks()
 
 
 # Получить конкретную задачу по ID
@@ -49,7 +49,7 @@ async def get_task(
     task_service: TaskServise = Depends(get_task_service),
 ):
     try:
-        task = task_service.get_task_by_id(task_id)
+        task = await task_service.get_task_by_id(task_id)
         return task
     except TaskNotFound:
         raise HTTPException(
@@ -63,7 +63,7 @@ async def update_task(
     task_for_update: TaskUpdateSchema,
     task_service: TaskServise = Depends(get_task_service),
 ):
-    task_service.update_task(task_for_update)
+    await task_service.update_task(task_for_update)
 
 
 @router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -71,4 +71,4 @@ async def delete_task(
     task_id: int,
     task_service: TaskServise = Depends(get_task_service),
 ):
-    task_service.delete_task(task_id)
+    await task_service.delete_task(task_id)

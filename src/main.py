@@ -2,31 +2,18 @@ from contextlib import asynccontextmanager
 
 import uvicorn
 from fastapi import FastAPI
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 
 from api.task import router as task_router
-from core.config import settings
+from db.session import engine
 from models import Base
-
-engine = create_engine(settings.DB_URL)
-SessionLocal = sessionmaker(bind=engine)
-
-
-def get_session():
-    session = SessionLocal()
-
-    try:
-        yield session
-    finally:
-        session.close()
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    # Base.metadata.drop_all(bind=engine)
-    Base.metadata.create_all(bind=engine)
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
     yield
+    await engine.dispose()
 
 
 app = FastAPI(lifespan=lifespan)

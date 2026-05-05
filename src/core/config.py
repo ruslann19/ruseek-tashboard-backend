@@ -14,7 +14,7 @@ class Settings:
         db_user = config["DB_USER"]
         db_password = config["DB_PASSWORD"]
 
-        self.DB_URL = f"postgresql+psycopg://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+        self.DB_URL = f"postgresql+asyncpg://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
 
 
 settings = Settings()
