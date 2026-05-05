@@ -11,7 +11,7 @@ class TaskORM(Base):
     benchmark_version: Mapped[int | None]
     state: Mapped[str]
 
-    answers: Mapped[list["AnswersOrm"]] = relationship(  # noqa: F821
+    answers: Mapped[list["AnswerORM"]] = relationship(  # noqa: F821
         back_populates="task",
         cascade="all, delete-orphan",
     )
