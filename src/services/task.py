@@ -20,7 +20,7 @@ class TaskServise:
 
     async def add_task(self, task: TaskCreateCoreSchema) -> TaskReadSchema:
         task_full = TaskCreateSchema.model_validate(task)
-        task_orm = await self.repository.create(**task_full.model_dump())
+        task_orm = await self.repository.add(**task_full.model_dump())
         await self.session.commit()
         return TaskReadSchema.model_validate(task_orm)
 

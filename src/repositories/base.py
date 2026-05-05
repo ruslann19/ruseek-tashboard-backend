@@ -12,7 +12,7 @@ class BaseRepository(Generic[T]):
         self.model = model
         self.session = session
 
-    async def create(self, **kwargs) -> T:
+    async def add(self, **kwargs) -> T:
         instance = self.model(**kwargs)
         self.session.add(instance)
         await self.session.flush()  # Получаем ID без коммита

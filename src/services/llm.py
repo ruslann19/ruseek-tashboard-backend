@@ -20,7 +20,7 @@ class LLMService:
 
     async def add_llm(self, llm: LLMCreateSchema) -> LLMReadSchema:
         try:
-            llm_orm = await self.repository.create(**llm.model_dump())
+            llm_orm = await self.repository.add(**llm.model_dump())
             await self.session.commit()
             return LLMReadSchema.model_validate(llm_orm)
         except IntegrityError:
