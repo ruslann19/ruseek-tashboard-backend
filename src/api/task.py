@@ -58,8 +58,7 @@ async def get_task(
     task_service: TaskServise = Depends(get_task_service),
 ):
     try:
-        task = await task_service.get_task_by_id(task_id)
-        return task
+        return await task_service.get_task_by_id(task_id)
     except TaskNotFound:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
