@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 
-import uvicorn
+# import uvicorn
 from fastapi import FastAPI
 
 from api import answer_router, llm_router, task_router
@@ -22,5 +22,5 @@ app.include_router(task_router)
 app.include_router(llm_router)
 app.include_router(answer_router)
 
-if __name__ == "__main__":
-    uvicorn.run(app="main:app", host="127.0.0.1", port=8000, reload=True)
+# if __name__ == "__main__":
+#     uvicorn.run(app="main:app", host="127.0.0.1", port=8000, reload=True)
