@@ -1,2 +1,2 @@
 run:
-	fastapi run ./src/main.py --host localhost --port 8001
+	fastapi run ./src/main.py --host localhost --port 8000

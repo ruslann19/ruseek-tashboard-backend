@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 
-# import uvicorn
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from api import answer_router, llm_router, task_router
 from db.session import engine
@@ -22,5 +22,12 @@ app.include_router(task_router)
 app.include_router(llm_router)
 app.include_router(answer_router)
 
-# if __name__ == "__main__":
-#     uvicorn.run(app="main:app", host="127.0.0.1", port=8000, reload=True)
+origins = [
+    "http://localhost:9000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_methods=["*"],
+)
