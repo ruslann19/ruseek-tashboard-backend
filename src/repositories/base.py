@@ -18,6 +18,12 @@ class BaseRepository(Generic[T]):
         await self.session.flush()  # Получаем ID без коммита
         return instance
 
+    async def add_all(self, items_data: list[dict]) -> list[T]:
+        instances = [self.model(**data) for data in items_data]
+        self.session.add_all(instances)
+        await self.session.flush()  # Получаем ID для всех объектов без коммита
+        return instances
+
     async def get_by_id(self, id: int) -> T | None:
         return await self.session.get(self.model, id)
 
@@ -33,6 +39,7 @@ class BaseRepository(Generic[T]):
             .values(**kwargs)
             .execution_options(synchronize_session="fetch")
         )
+        print(query)
         await self.session.execute(query)
 
     async def delete(self, id: int):

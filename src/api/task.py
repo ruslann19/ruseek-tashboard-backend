@@ -1,3 +1,5 @@
+from datetime import date
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -10,6 +12,7 @@ from schemas.task import (
 )
 from services import TaskServise
 from services.task import TaskNotFound
+from utils.parse_tasks import parse_tasks
 
 router = APIRouter(
     prefix="/tasks",
@@ -35,6 +38,40 @@ async def create_task(
     task_service: TaskServise = Depends(get_task_service),
 ):
     return await task_service.add_task(task)
+
+
+@router.post(
+    "/collect",
+    summary='Добавить задачи из выпуска передачи "Своя игра"',
+    response_model=list[TaskReadSchema],
+)
+async def collect_tasks(
+    url: str,
+    published_date: date,
+    task_service: TaskServise = Depends(get_task_service),
+):
+    with open("./temporary_files/game_example.txt", "r") as f:
+        text = f.read()
+
+    added_tasks = []
+
+    metadata = {
+        "published_date": published_date,
+        "source_url": url,
+    }
+
+    print(metadata)
+
+    async for task in parse_tasks(text, metadata):
+        # print("Поймали задачу асинхронно!")
+        # print(f"Вопрос: {task.question}")
+        # print(f"Ответ: {task.correct_answer}")
+        # print("-" * 20)
+
+        added_task = await task_service.add_task(task)
+        added_tasks.append(added_task)
+
+    return added_tasks
 
 
 @router.get(
@@ -75,6 +112,7 @@ async def update_task(
     task_for_update: TaskUpdateSchema,
     task_service: TaskServise = Depends(get_task_service),
 ):
+    print(f"task for update: {task_for_update}")
     await task_service.update_task(task_for_update)
 
 

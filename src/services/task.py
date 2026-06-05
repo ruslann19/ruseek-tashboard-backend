@@ -42,6 +42,8 @@ class TaskServise:
         data = task_for_update.model_dump(exclude_none=True)
         del data["id"]
 
+        print(f"data: {data}")
+
         if len(data) > 0:
             await self.repository.update(id=task_id, **data)
             await self.session.commit()
