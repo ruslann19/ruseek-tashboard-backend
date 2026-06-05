@@ -39,7 +39,6 @@ class BaseRepository(Generic[T]):
             .values(**kwargs)
             .execution_options(synchronize_session="fetch")
         )
-        print(query)
         await self.session.execute(query)
 
     async def delete(self, id: int):

@@ -60,8 +60,6 @@ async def collect_tasks(
         "source_url": url,
     }
 
-    print(metadata)
-
     async for task in parse_tasks(text, metadata):
         # print("Поймали задачу асинхронно!")
         # print(f"Вопрос: {task.question}")
@@ -112,7 +110,6 @@ async def update_task(
     task_for_update: TaskUpdateSchema,
     task_service: TaskServise = Depends(get_task_service),
 ):
-    print(f"task for update: {task_for_update}")
     await task_service.update_task(task_for_update)
 
 
