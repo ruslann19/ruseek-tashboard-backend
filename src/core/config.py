@@ -9,7 +9,7 @@ class Settings:
     def __init__(self):
         self.OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
         self.DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
-        # self.GIGACHAT_API_KEY = config["GIGACHAT_API_KEY"]
+        self.ROUTERAI_API_KEY = os.getenv("ROUTERAI_API_KEY")
 
         db_name = os.getenv("DB_NAME")
         db_host = os.getenv("DB_HOST")

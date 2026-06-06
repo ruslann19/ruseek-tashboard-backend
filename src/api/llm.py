@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.session import get_async_session
+from external_api import RouterAiApi
 from repositories import LLMRepository
 from schemas.llm import LLMCreateSchema, LLMReadSchema, LLMUpdateSchema
 from services import LLMService
@@ -31,11 +32,28 @@ async def create_llm(
     llm_service: LLMService = Depends(get_llm_service),
 ):
     try:
+        router_ai_api = RouterAiApi()
+        router_ai_models = await router_ai_api.get_models()
+        router_ai_models_ids = [model["id"] for model in router_ai_models]
+
+        gigachat_models = ["GigaChat-2", "GigaChat-2-Pro", "GigaChat-2-Max"]
+
+        if (
+            llm.model_name not in gigachat_models
+            or llm.model_name not in router_ai_models_ids
+        ):
+            raise ValueError("Данная модель не поддерживается")
+
         return await llm_service.add_llm(llm)
     except LLMAlreadyExists:
         raise HTTPException(
             status_code=status.HTTP_406_NOT_ACCEPTABLE,
             detail="LLM уже существует",
+        )
+    except ValueError as error:
+        raise HTTPException(
+            status_code=status.HTTP_406_NOT_ACCEPTABLE,
+            detail=str(error),
         )
 
 
