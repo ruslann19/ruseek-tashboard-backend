@@ -20,14 +20,14 @@ def load_html(url: str) -> str:
     parsed = urlparse(url)
     query_params = parse_qs(parsed.query)
 
-    # TODO: Добавить проверку, что URL соответствует определённому домену
+    # Проверка, что URL соответствует определённому домену
     if not (
-        parsed.netloc == "www.forumsi.org"
+        parsed.netloc in "www.forumsi.org"
         and parsed.path == "/showpost.php"
         and "p" in query_params
     ):
         raise ValueError(
-            "URL должен соответствовать схеме: http://www.forumsi.org/showpost.php?p=..."
+            'URL должен соответствовать схеме: "http://www.forumsi.org/showpost.php?p=..."'
         )
 
     try:
@@ -47,7 +47,7 @@ def extract_text_from_html_block(html_string, post_message):
     id = f"post_message_{post_message}"
     block = soup.find("div", id=id)
     if not block:
-        raise ValueError(f'Блок с id="{id}" не найден')
+        raise ValueError(f'Блок с id="{id}" не найден на странице')
 
     # Заменяем <br> на '\n', чтобы сохранить разрывы строк
     for br in block.find_all("br"):

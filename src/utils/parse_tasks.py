@@ -1,16 +1,16 @@
 import json
 from collections.abc import AsyncIterator
-from typing import Any
 
 from openai import AsyncOpenAI
 
 from core.config import settings
 from schemas.task import TaskCreateCoreSchema
+from schemas.your_own_game import YourOwnGameMetadata
 
 
 async def parse_tasks(
     text: str,
-    metadata: dict[str, Any],
+    game_metadata: YourOwnGameMetadata,
 ) -> AsyncIterator[TaskCreateCoreSchema]:
     with open("./prompt_templates/parse_game.txt") as f:
         parse_game_prompt = f.read()
@@ -53,23 +53,23 @@ async def parse_tasks(
                     task = TaskCreateCoreSchema(
                         question=task_json["question"],
                         correct_answer=task_json["answer"],
-                        published_date=metadata["published_date"],
-                        source_url=metadata["source_url"],
+                        published_date=game_metadata.published_date,
+                        source_url=game_metadata.source_url,
                     )
                     yield task  # Отдаем готовую задачу в вызывающий код
                 except json.JSONDecodeError:
                     continue  # Игнорируем битые строки
 
-    remaining_line = buffer.strip()
-    if remaining_line:
-        try:
-            task_json = json.loads(line)
-            task = TaskCreateCoreSchema(
-                question=task_json["question"],
-                correct_answer=task_json["answer"],
-                published_date=metadata["published_date"],
-                source_url=metadata["source_url"],
-            )
-            yield task  # Отдаем готовую задачу в вызывающий код
-        except json.JSONDecodeError:
-            pass  # Если на конце остался мусор, просто игнорируем его
+    # remaining_line = buffer.strip()
+    # if remaining_line:
+    #     try:
+    #         task_json = json.loads(line)
+    #         task = TaskCreateCoreSchema(
+    #             question=task_json["question"],
+    #             correct_answer=task_json["answer"],
+    #             published_date=game_metadata.published_date,
+    #             source_url=game_metadata.source_url,
+    #         )
+    #         yield task  # Отдаем готовую задачу в вызывающий код
+    #     except json.JSONDecodeError:
+    #         pass  # Если на конце остался мусор, просто игнорируем его
