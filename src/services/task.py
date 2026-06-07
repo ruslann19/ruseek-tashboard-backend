@@ -1,7 +1,10 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from models import TaskOrm
+from repositories.benchmark_version import BenchmarkVersionRepository
 from repositories.task import TaskRepository
-from schemas.task import (
+from schemas import (
+    BenchmarkVersion,
     TaskCreateCoreSchema,
     TaskCreateSchema,
     TaskReadSchema,
@@ -49,3 +52,31 @@ class TaskServise:
     async def delete_task(self, task_id: int) -> None:
         await self.repository.delete(task_id)
         await self.session.commit()
+
+    async def get_benchmark_versions(self) -> dict[str, list[BenchmarkVersion]]:
+        # Существующие версии бенчмарка
+        versions_repository = BenchmarkVersionRepository(self.session)
+        existing_versions_orm = await versions_repository.get_all()
+        existing_versions = [
+            BenchmarkVersion.model_validate(version)
+            for version in existing_versions_orm
+        ]
+
+        # Потенциальные версии бенчмарка
+        not_tested_tasks = await self.repository.get_by_complex_filter(
+            TaskOrm.benchmark_version.is_(None)
+        )
+        potential_versions = set()
+        for task in not_tested_tasks:
+            version = BenchmarkVersion(
+                year=task.published_date.year,
+                month=task.published_date.month,
+            )
+
+            if version not in existing_versions:
+                potential_versions.add(version)
+
+        return {
+            "existing": sorted(existing_versions),
+            "potential": sorted(list(potential_versions)),
+        }

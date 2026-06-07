@@ -27,8 +27,21 @@ class BaseRepository(Generic[T]):
     async def get_by_id(self, id: int) -> T | None:
         return await self.session.get(self.model, id)
 
-    async def get_all(self) -> list[T]:
-        query = select(self.model)
+    async def get_all(self, **filters) -> list[T]:
+        query = select(self.model).filter_by(**filters)
+        result = await self.session.execute(query)
+        return list(result.scalars().all())
+
+    async def get_one_or_none(self, **filters) -> T | None:
+        query = select(self.model).filter_by(**filters)
+        result = await self.session.execute(query)
+        return result.scalar_one_or_none()
+
+    async def get_by_complex_filter(self, *expressions) -> list[T]:
+        """
+        Принимает конструкции вида: Model.age > 18, Model.name.like("%Иван%")
+        """
+        query = select(self.model).where(*expressions)
         result = await self.session.execute(query)
         return list(result.scalars().all())
 
