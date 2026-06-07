@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api import answer_router, llm_router, task_router, ws_router
+from api import answer_router, balance_router, llm_router, task_router, ws_router
 from db.session import engine
 from models import Base
 
@@ -22,6 +22,7 @@ app.include_router(task_router)
 app.include_router(llm_router)
 app.include_router(answer_router)
 app.include_router(ws_router)
+app.include_router(balance_router)
 
 origins = [
     "http://localhost:9000",

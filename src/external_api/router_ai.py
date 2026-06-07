@@ -1,7 +1,12 @@
 import httpx
 from httpx import Response
+from pydantic import BaseModel
 
 from core.config import settings
+
+
+class RouterAiBalanceResponse(BaseModel):
+    rubles: float
 
 
 class RouterAiApi:
@@ -18,10 +23,11 @@ class RouterAiApi:
             )
             return response
 
-    async def get_routerai_balance(self):
+    async def get_balance(self) -> RouterAiBalanceResponse:
         response = await self.get("https://routerai.ru/api/v1/credits")
-        credits = response.json()["data"]["credits"]
-        return credits
+        balance = response.json()["data"]["credits"]
+        response = RouterAiBalanceResponse(rubles=balance)
+        return response
 
     async def get_models(self):
         response = await self.get("https://routerai.ru/api/v1/models")
