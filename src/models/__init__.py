@@ -1,4 +1,4 @@
-from .answer import AnswerORM
+from .answer import AnswerOrm
 from .base import Base
-from .llm import LLMORM
-from .task import TaskORM
+from .llm import LlmOrm
+from .task import TaskOrm

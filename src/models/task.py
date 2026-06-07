@@ -5,7 +5,7 @@ from sqlalchemy.orm import Mapped, relationship
 from .base import Base
 
 
-class TaskORM(Base):
+class TaskOrm(Base):
     __tablename__ = "tasks"
 
     question: Mapped[str]
@@ -16,7 +16,7 @@ class TaskORM(Base):
     published_date: Mapped[date]
     source_url: Mapped[str]
 
-    answers: Mapped[list["AnswerORM"]] = relationship(  # noqa: F821
+    answers: Mapped[list["AnswerOrm"]] = relationship(  # noqa: F821
         back_populates="task",
         cascade="all, delete-orphan",
     )

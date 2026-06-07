@@ -1,10 +1,10 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models import LLMORM
+from models import LlmOrm
 
 from .base import BaseRepository
 
 
-class LLMRepository(BaseRepository[LLMORM]):
+class LlmRepository(BaseRepository[LlmOrm]):
     def __init__(self, session: AsyncSession):
-        super().__init__(LLMORM, session)
+        super().__init__(LlmOrm, session)

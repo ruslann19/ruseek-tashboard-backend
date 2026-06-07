@@ -6,7 +6,7 @@ from repositories import AnswerRepository
 from schemas.answer import AnswerCreateSchema, AnswerReadSchema, AnswerUpdateSchema
 from services import AnswerService
 from services.answer import AnswerNotFound
-from services.llm import LLMNotFound
+from services.llm import LlmNotFound
 from services.task import TaskNotFound
 
 
@@ -42,7 +42,7 @@ async def create_answer(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Соответствующая задача не найдена",
         )
-    except LLMNotFound:
+    except LlmNotFound:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Соответствующая LLM не найдена",

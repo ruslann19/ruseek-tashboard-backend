@@ -1,16 +1,16 @@
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class LLMCreateSchema(BaseModel):
-    model_name: str
+class LlmCreateSchema(BaseModel):
+    llm_name: str
 
     model_config = ConfigDict(from_attributes=True)
 
 
-class LLMReadSchema(LLMCreateSchema):
+class LlmReadSchema(LlmCreateSchema):
     id: int
 
 
-class LLMUpdateSchema(BaseModel):
+class LlmUpdateSchema(BaseModel):
     id: int
     model_name: str | None = Field(default=None, examples=[None])

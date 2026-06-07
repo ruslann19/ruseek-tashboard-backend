@@ -9,7 +9,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
 from src.core.config import settings
-from src.models import LLMORM, AnswerORM, Base, TaskORM  # noqa
+from src.models import AnswerOrm, Base, LlmOrm, TaskOrm  # noqa
 
 config = context.config
 

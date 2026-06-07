@@ -1,3 +1,3 @@
 from .answer import AnswerRepository
-from .llm import LLMRepository
+from .llm import LlmRepository
 from .task import TaskRepository

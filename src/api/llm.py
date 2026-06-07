@@ -3,10 +3,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.session import get_async_session
 from external_api import RouterAiApi
-from repositories import LLMRepository
-from schemas.llm import LLMCreateSchema, LLMReadSchema, LLMUpdateSchema
-from services import LLMService
-from services.llm import LLMAlreadyExists, LLMNotFound
+from repositories import LlmRepository
+from schemas.llm import LlmCreateSchema, LlmReadSchema, LlmUpdateSchema
+from services import LlmService
+from services.llm import LlmAlreadyExists, LlmNotFound
 
 router = APIRouter(
     prefix="/llms",
@@ -15,21 +15,21 @@ router = APIRouter(
 
 
 async def get_llm_repository(session: AsyncSession = Depends(get_async_session)):
-    return LLMRepository(session)
+    return LlmRepository(session)
 
 
-async def get_llm_service(repository: LLMRepository = Depends(get_llm_repository)):
-    return LLMService(repository, repository.session)
+async def get_llm_service(repository: LlmRepository = Depends(get_llm_repository)):
+    return LlmService(repository, repository.session)
 
 
 @router.post(
     "/",
-    response_model=LLMReadSchema,
-    summary="Создать новую LLM",
+    response_model=LlmReadSchema,
+    summary="Создать новую Llm",
 )
 async def create_llm(
-    llm: LLMCreateSchema,
-    llm_service: LLMService = Depends(get_llm_service),
+    llm: LlmCreateSchema,
+    llm_service: LlmService = Depends(get_llm_service),
 ):
     try:
         router_ai_api = RouterAiApi()
@@ -39,13 +39,17 @@ async def create_llm(
         gigachat_models = ["GigaChat-2", "GigaChat-2-Pro", "GigaChat-2-Max"]
 
         if (
-            llm.model_name not in gigachat_models
-            or llm.model_name not in router_ai_models_ids
+            llm.llm_name not in gigachat_models
+            and llm.llm_name not in router_ai_models_ids
         ):
+            print(
+                llm.llm_name not in gigachat_models
+                or llm.llm_name not in router_ai_models_ids
+            )
             raise ValueError("Данная модель не поддерживается")
 
         return await llm_service.add_llm(llm)
-    except LLMAlreadyExists:
+    except LlmAlreadyExists:
         raise HTTPException(
             status_code=status.HTTP_406_NOT_ACCEPTABLE,
             detail="LLM уже существует",
@@ -59,27 +63,27 @@ async def create_llm(
 
 @router.get(
     "/",
-    response_model=list[LLMReadSchema],
+    response_model=list[LlmReadSchema],
     summary="Получить все LLM",
 )
 async def get_llms(
-    llm_service: LLMService = Depends(get_llm_service),
+    llm_service: LlmService = Depends(get_llm_service),
 ):
     return await llm_service.get_all_llms()
 
 
 @router.get(
     "/{llm_id}",
-    response_model=LLMReadSchema,
+    response_model=LlmReadSchema,
     summary="Получить конкретную LLM по ID",
 )
 async def get_llm(
     llm_id: int,
-    llm_service: LLMService = Depends(get_llm_service),
+    llm_service: LlmService = Depends(get_llm_service),
 ):
     try:
         return await llm_service.get_llm_by_id(llm_id)
-    except LLMNotFound:
+    except LlmNotFound:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="LLM не найдена",
@@ -92,8 +96,8 @@ async def get_llm(
     summary="Обновить конкретную LLM по ID",
 )
 async def update_llm(
-    llm_data_for_update: LLMUpdateSchema,
-    llm_service: LLMService = Depends(get_llm_service),
+    llm_data_for_update: LlmUpdateSchema,
+    llm_service: LlmService = Depends(get_llm_service),
 ):
     await llm_service.update_llm(llm_data_for_update)
 
@@ -105,6 +109,6 @@ async def update_llm(
 )
 async def delete_llm(
     llm_id: int,
-    llm_service: LLMService = Depends(get_llm_service),
+    llm_service: LlmService = Depends(get_llm_service),
 ):
     await llm_service.delete_llm(llm_id)

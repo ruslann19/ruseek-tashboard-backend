@@ -1,9 +1,9 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from repositories import AnswerRepository, LLMRepository, TaskRepository
+from repositories import AnswerRepository, LlmRepository, TaskRepository
 from schemas.answer import AnswerCreateSchema, AnswerReadSchema, AnswerUpdateSchema
 
-from .llm import LLMService
+from .llm import LlmService
 from .task import TaskServise
 
 
@@ -22,8 +22,8 @@ class AnswerService:
         # Если задача не найдётся, то выбростися исключение TaskNotFound
         await task_service.get_task_by_id(answer.task_id)
 
-        llm_repository = LLMRepository(self.session)
-        llm_service = LLMService(llm_repository, self.session)
+        llm_repository = LlmRepository(self.session)
+        llm_service = LlmService(llm_repository, self.session)
         # Если задача не найдётся, то выбростися исключение LLMNotFound
         await llm_service.get_llm_by_id(answer.llm_id)
 
