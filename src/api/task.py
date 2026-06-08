@@ -50,6 +50,19 @@ async def get_tasks(
 
 
 @router.get(
+    "/by-month",
+    response_model=list[TaskReadSchema],
+    summary="Получить задачи за определённый месяц",
+)
+async def get_tasks_by_month(
+    year: int,
+    month: int,
+    task_service: TaskServise = Depends(get_task_service),
+):
+    return await task_service.get_tasks_by_month(year, month)
+
+
+@router.get(
     "/benchmark-versions",
     response_model=dict[str, list[BenchmarkVersion]],
     summary="Получить список версий бенчмарка (имеющихся и потенциальных)",

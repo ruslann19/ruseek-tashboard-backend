@@ -42,10 +42,6 @@ async def create_llm(
             llm.llm_name not in gigachat_models
             and llm.llm_name not in router_ai_models_ids
         ):
-            print(
-                llm.llm_name not in gigachat_models
-                or llm.llm_name not in router_ai_models_ids
-            )
             raise ValueError("Данная модель не поддерживается")
 
         return await llm_service.add_llm(llm)

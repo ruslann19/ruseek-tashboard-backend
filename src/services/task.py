@@ -1,3 +1,6 @@
+import calendar
+from datetime import date
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models import TaskOrm
@@ -63,7 +66,7 @@ class TaskServise:
         ]
 
         # Потенциальные версии бенчмарка
-        not_tested_tasks = await self.repository.get_by_complex_filter(
+        not_tested_tasks = await self.repository.get_all(
             TaskOrm.benchmark_version.is_(None)
         )
         potential_versions = set()
@@ -80,3 +83,15 @@ class TaskServise:
             "existing": sorted(existing_versions),
             "potential": sorted(list(potential_versions)),
         }
+
+    async def get_tasks_by_month(self, year: int, month: int) -> list[TaskReadSchema]:
+        start_date = date(year, month, 1)
+
+        _, last_day = calendar.monthrange(year, month)
+        end_date = date(year, month, last_day)
+
+        tasks_orm = await self.repository.get_all(
+            TaskOrm.published_date.between(start_date, end_date)
+        )
+        tasks = [TaskReadSchema.model_validate(task) for task in tasks_orm]
+        return tasks
