@@ -1,6 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models import AnswerOrm, BenchmarkVersionOrm
 from repositories import (
     AnswerRepository,
     BenchmarkVersionRepository,
