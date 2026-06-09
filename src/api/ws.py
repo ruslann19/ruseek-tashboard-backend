@@ -9,11 +9,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from db.session import async_session_maker
 from llm_clients import (
     Judge,
-    LlmClient,
-    LlmJudge,
     MockJudge,
     MockLlmClient,
-    RouterAiClient,
 )
 from schemas import (
     AnswerCreateSchema,
@@ -74,7 +71,7 @@ async def collect_tasks(websocket: WebSocket):
         pass
 
 
-@router.websocket("/test-llms")
+@router.websocket("/create-benchmark-version")
 async def test_llms(websocket: WebSocket):
     await websocket.accept()
 

@@ -19,7 +19,7 @@ router = APIRouter(
 
 
 @router.get(
-    "/",
+    "",
     response_model=list[AnswerReadSchema],
     summary="Получить все ответы",
 )

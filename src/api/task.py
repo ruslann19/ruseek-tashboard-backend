@@ -3,7 +3,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.session import get_async_session
 from schemas import (
-    BenchmarkVersionCreateSchema,
     TaskCreateCoreSchema,
     TaskReadSchema,
     TaskUpdateSchema,
@@ -22,7 +21,7 @@ async def get_task_service(session: AsyncSession = Depends(get_async_session)):
 
 
 @router.post(
-    "/",
+    "",
     response_model=TaskReadSchema,
     summary="Создать новую задачу",
 )
@@ -34,7 +33,7 @@ async def create_task(
 
 
 @router.get(
-    "/",
+    "",
     response_model=list[TaskReadSchema],
     summary="Получить все задачи",
 )

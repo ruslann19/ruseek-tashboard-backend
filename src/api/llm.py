@@ -18,7 +18,7 @@ async def get_llm_service(session: AsyncSession = Depends(get_async_session)):
 
 
 @router.post(
-    "/",
+    "",
     response_model=LlmReadSchema,
     summary="Создать новую Llm",
 )
@@ -50,7 +50,7 @@ async def create_llm(
 
 
 @router.get(
-    "/",
+    "",
     response_model=list[LlmReadSchema],
     summary="Получить все LLM",
 )
