@@ -26,29 +26,6 @@ router = APIRouter(
 )
 
 
-@router.post(
-    "/",
-    response_model=AnswerReadSchema,
-    summary="Создать новый ответ",
-)
-async def add_answer(
-    answer: AnswerCreateSchema,
-    answer_service: AnswerService = Depends(get_answer_service),
-):
-    try:
-        return await answer_service.add_answer(answer)
-    except TaskNotFound:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Соответствующая задача не найдена",
-        )
-    except LlmNotFound:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Соответствующая LLM не найдена",
-        )
-
-
 @router.get(
     "/",
     response_model=list[AnswerReadSchema],
@@ -76,27 +53,3 @@ async def get_answer_by_id(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Ответ не найден",
         )
-
-
-@router.put(
-    "/{answer_id}",
-    status_code=status.HTTP_204_NO_CONTENT,
-    summary="Обновить конкретный ответ по ID",
-)
-async def update_answer(
-    answer_data_for_update: AnswerUpdateSchema,
-    answer_service: AnswerService = Depends(get_answer_service),
-):
-    await answer_service.update_answer(answer_data_for_update)
-
-
-@router.delete(
-    "/{answer_id}",
-    status_code=status.HTTP_204_NO_CONTENT,
-    summary="Удалить конкретный ответ по ID",
-)
-async def delete_answer(
-    answer_id: int,
-    answer_service: AnswerService = Depends(get_answer_service),
-):
-    await answer_service.delete_answer(answer_id)
