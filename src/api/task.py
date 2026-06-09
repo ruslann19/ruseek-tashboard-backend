@@ -58,17 +58,6 @@ async def get_tasks_by_month(
 
 
 @router.get(
-    "/benchmark-versions",
-    response_model=dict[str, list[BenchmarkVersionCreateSchema]],
-    summary="Получить список версий бенчмарка (имеющихся и потенциальных)",
-)
-async def get_benchmark_versions(
-    task_service: TaskService = Depends(get_task_service),
-):
-    return await task_service.get_benchmark_versions()
-
-
-@router.get(
     "/{task_id}",
     response_model=TaskReadSchema,
     summary="Получить конкретную задачу по ID",
