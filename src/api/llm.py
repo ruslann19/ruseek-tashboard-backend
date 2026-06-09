@@ -36,12 +36,9 @@ async def create_llm(
         router_ai_models = await router_ai_api.get_models()
         router_ai_models_ids = [model["id"] for model in router_ai_models]
 
-        gigachat_models = ["GigaChat-2", "GigaChat-2-Pro", "GigaChat-2-Max"]
+        # gigachat_models = ["GigaChat-2", "GigaChat-2-Pro", "GigaChat-2-Max"]
 
-        if (
-            llm.llm_name not in gigachat_models
-            and llm.llm_name not in router_ai_models_ids
-        ):
+        if llm.llm_name not in router_ai_models_ids:
             raise ValueError("Данная модель не поддерживается")
 
         return await llm_service.add_llm(llm)

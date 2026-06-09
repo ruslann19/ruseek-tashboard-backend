@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from db.session import get_async_session
 from repositories import TaskRepository
 from schemas import (
-    BenchmarkVersion,
+    BenchmarkVersionCreateSchema,
     TaskCreateCoreSchema,
     TaskReadSchema,
     TaskUpdateSchema,
@@ -64,7 +64,7 @@ async def get_tasks_by_month(
 
 @router.get(
     "/benchmark-versions",
-    response_model=dict[str, list[BenchmarkVersion]],
+    response_model=dict[str, list[BenchmarkVersionCreateSchema]],
     summary="Получить список версий бенчмарка (имеющихся и потенциальных)",
 )
 async def get_benchmark_versions(

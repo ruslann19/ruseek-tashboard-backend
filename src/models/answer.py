@@ -12,8 +12,9 @@ class AnswerOrm(Base):
     benchmark_version_id: Mapped[int] = mapped_column(
         ForeignKey("benchmark_versions.id", ondelete="CASCADE")
     )
-    answer: Mapped[str]
+    llm_answer: Mapped[str]
     is_correct: Mapped[bool | None]
+    judge_explaination: Mapped[str | None]
 
     task: Mapped[list["TaskOrm"]] = relationship(back_populates="answers")  # noqa: F821
     llm: Mapped[list["LlmOrm"]] = relationship(back_populates="answers")  # noqa: F821

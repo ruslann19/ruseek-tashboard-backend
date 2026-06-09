@@ -16,7 +16,7 @@ class AnswerService:
         self.repository = repository
         self.session = session
 
-    async def create_answer(self, answer: AnswerCreateSchema) -> AnswerReadSchema:
+    async def add_answer(self, answer: AnswerCreateSchema) -> AnswerReadSchema:
         task_repository = TaskRepository(self.session)
         task_service = TaskServise(task_repository, self.session)
         # Если задача не найдётся, то выбростися исключение TaskNotFound

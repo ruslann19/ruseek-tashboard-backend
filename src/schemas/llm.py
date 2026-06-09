@@ -13,4 +13,4 @@ class LlmReadSchema(LlmCreateSchema):
 
 class LlmUpdateSchema(BaseModel):
     id: int
-    model_name: str | None = Field(default=None, examples=[None])
+    llm_name: str | None = Field(default=None, examples=[None])

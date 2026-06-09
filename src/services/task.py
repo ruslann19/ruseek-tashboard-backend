@@ -7,7 +7,7 @@ from models import TaskOrm
 from repositories.benchmark_version import BenchmarkVersionRepository
 from repositories.task import TaskRepository
 from schemas import (
-    BenchmarkVersion,
+    BenchmarkVersionCreateSchema,
     TaskCreateCoreSchema,
     TaskCreateSchema,
     TaskReadSchema,
@@ -56,12 +56,14 @@ class TaskServise:
         await self.repository.delete(task_id)
         await self.session.commit()
 
-    async def get_benchmark_versions(self) -> dict[str, list[BenchmarkVersion]]:
+    async def get_benchmark_versions(
+        self,
+    ) -> dict[str, list[BenchmarkVersionCreateSchema]]:
         # Существующие версии бенчмарка
         versions_repository = BenchmarkVersionRepository(self.session)
         existing_versions_orm = await versions_repository.get_all()
         existing_versions = [
-            BenchmarkVersion.model_validate(version)
+            BenchmarkVersionCreateSchema.model_validate(version)
             for version in existing_versions_orm
         ]
 
@@ -71,7 +73,7 @@ class TaskServise:
         )
         potential_versions = set()
         for task in not_tested_tasks:
-            version = BenchmarkVersion(
+            version = BenchmarkVersionCreateSchema(
                 year=task.published_date.year,
                 month=task.published_date.month,
             )

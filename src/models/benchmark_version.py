@@ -1,5 +1,5 @@
-from sqlalchemy import ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import UniqueConstraint
+from sqlalchemy.orm import Mapped, relationship
 
 from .base import Base
 
@@ -14,3 +14,5 @@ class BenchmarkVersionOrm(Base):
         back_populates="benchmark_version",
         cascade="all, delete-orphan",
     )
+
+    __table_args__ = (UniqueConstraint("year", "month", name="unique_year_and_month"),)

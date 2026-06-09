@@ -31,12 +31,12 @@ router = APIRouter(
     response_model=AnswerReadSchema,
     summary="Создать новый ответ",
 )
-async def create_answer(
+async def add_answer(
     answer: AnswerCreateSchema,
     answer_service: AnswerService = Depends(get_answer_service),
 ):
     try:
-        return await answer_service.create_answer(answer)
+        return await answer_service.add_answer(answer)
     except TaskNotFound:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
