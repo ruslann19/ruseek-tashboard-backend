@@ -98,10 +98,6 @@ async def test_llms(websocket: WebSocket):
         benchmark_version_service = BenchmarkVersionServise(
             benchmark_version_repository, session
         )
-        # TODO: убрать этот код (удаление существующих версий бенчмарка) после тестирования
-        existing_versions = await benchmark_version_service.get_all()
-        for version in existing_versions:
-            await benchmark_version_service.delete(version.id)
 
         added_benchmark_version = await benchmark_version_service.add(benchmark_version)
 
@@ -128,9 +124,6 @@ async def test_llms(websocket: WebSocket):
     await asyncio.gather(*pipelines, return_exceptions=True)
 
     await websocket.close()
-
-    # TODO: убрать это (удаление созданной версии бенчмарка)
-    # await benchmark_version_service.delete(added_benchmark_version.id)
 
 
 @router.websocket("/update-benchmark-version")
@@ -225,9 +218,6 @@ async def update_benchmark_version(websocket: WebSocket):
     await asyncio.gather(*pipelines, return_exceptions=True)
 
     await websocket.close()
-
-    # TODO: убрать это (удаление созданной версии бенчмарка)
-    # await benchmark_version_service.delete(added_benchmark_version.id)
 
 
 def create_question_with_header(question: str) -> str:
