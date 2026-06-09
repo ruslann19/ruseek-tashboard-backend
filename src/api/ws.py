@@ -4,6 +4,7 @@ from typing import Literal
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, ConfigDict
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.session import async_session_maker
 from llm_clients import (
@@ -112,21 +113,110 @@ async def test_llms(websocket: WebSocket):
     for task in selected_tasks:
         for llm in selected_llms:
             async with async_session_maker() as session:
-                answer_repository = AnswerRepository(session)
-                answer_service = AnswerService(answer_repository, session)
-
-                # TODO: вернуть реального клиента
-                llm_client = MockLlmClient()
-                # llm_client = RouterAiClient(model=llm.llm_name)
-
                 pipeline = asyncio.create_task(
                     run_pipline(
                         llm_schema=llm,
-                        llm_client=llm_client,
                         task=task,
                         benchmark_version=added_benchmark_version,
                         judge=judge,
-                        answer_service=answer_service,
+                        session=session,
+                        websocket=websocket,
+                    )
+                )
+                pipelines.append(pipeline)
+
+    await asyncio.gather(*pipelines, return_exceptions=True)
+
+    await websocket.close()
+
+    # TODO: убрать это (удаление созданной версии бенчмарка)
+    # await benchmark_version_service.delete(added_benchmark_version.id)
+
+
+@router.websocket("/update-benchmark-version")
+async def update_benchmark_version(websocket: WebSocket):
+    await websocket.accept()
+
+    received_data = await websocket.receive_json()
+
+    benchmark_version = BenchmarkVersionCreateSchema(
+        year=received_data["benchmark_version"]["year"],
+        month=received_data["benchmark_version"]["month"],
+    )
+
+    old_tasks = [TaskReadSchema(**task) for task in received_data["old_tasks"]]
+    deleted_tasks = [TaskReadSchema(**task) for task in received_data["deleted_tasks"]]
+    new_tasks = [TaskReadSchema(**task) for task in received_data["new_tasks"]]
+
+    old_llms = [LlmReadSchema(**llm) for llm in received_data["old_llms"]]
+    deleted_llms = [LlmReadSchema(**llm) for llm in received_data["deleted_llms"]]
+    new_llms = [LlmReadSchema(**llm) for llm in received_data["new_llms"]]
+
+    # Удаляем то, что удалили
+    async with async_session_maker() as session:
+        answer_repository = AnswerRepository(session)
+        answer_service = AnswerService(answer_repository, session)
+
+        answers_for_delete = []
+
+        for deleted_llm in deleted_llms:
+            deleted_llm_answers = await answer_service.get_all_answers(
+                llm_id=deleted_llm.id
+            )
+            answers_for_delete.extend(deleted_llm_answers)
+
+        for deleted_task in deleted_tasks:
+            deleted_task_answers = await answer_service.get_all_answers(
+                task_id=deleted_task.id
+            )
+            answers_for_delete.extend(deleted_task_answers)
+
+        for answer in answers_for_delete:
+            await answer_service.delete_answer(answer.id)
+
+        # Загружаем версию бенчмарка (вместе с id)
+        benchmark_version_repository = BenchmarkVersionRepository(session)
+        benchmark_version_service = BenchmarkVersionServise(
+            benchmark_version_repository, session
+        )
+        loaded_benchmark_version = await benchmark_version_service.get_one_or_none(
+            year=benchmark_version.year,
+            month=benchmark_version.month,
+        )
+
+    # TODO: вернуть реального судью
+    judge = MockJudge()
+    # judge = LlmJudge()
+    pipelines = []
+
+    for task in old_tasks:
+        for llm in new_llms:
+            async with async_session_maker() as session:
+                pipeline = asyncio.create_task(
+                    run_pipline(
+                        llm_schema=llm,
+                        task=task,
+                        benchmark_version=loaded_benchmark_version,
+                        judge=judge,
+                        session=session,
+                        websocket=websocket,
+                    )
+                )
+                pipelines.append(pipeline)
+
+    filtered_old_llms = [llm for llm in old_llms if llm not in deleted_llms]
+    all_testing_llms = filtered_old_llms + new_llms
+
+    for task in new_tasks:
+        for llm in all_testing_llms:
+            async with async_session_maker() as session:
+                pipeline = asyncio.create_task(
+                    run_pipline(
+                        llm_schema=llm,
+                        task=task,
+                        benchmark_version=loaded_benchmark_version,
+                        judge=judge,
+                        session=session,
                         websocket=websocket,
                     )
                 )
@@ -159,13 +249,19 @@ class ProgressInfo(BaseModel):
 
 async def run_pipline(
     llm_schema: LlmReadSchema,
-    llm_client: LlmClient,
     task: TaskReadSchema,
     benchmark_version: BenchmarkVersionReadSchema,
     judge: Judge,
-    answer_service: AnswerService,
+    session: AsyncSession,
     websocket: WebSocket,
 ) -> None:
+    answer_repository = AnswerRepository(session)
+    answer_service = AnswerService(answer_repository, session)
+
+    # TODO: вернуть реального клиента
+    llm_client = MockLlmClient()
+    # llm_client = RouterAiClient(model=llm.llm_name)
+
     formatted_question = create_question_with_header(task.question)
     llm_answer = await llm_client.ask(formatted_question)
 

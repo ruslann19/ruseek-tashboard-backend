@@ -27,12 +27,30 @@ class BenchmarkVersionServise:
         await self.session.commit()
         return BenchmarkVersionReadSchema.model_validate(benchmark_version_orm)
 
-    async def get_all(self) -> list[BenchmarkVersionReadSchema]:
-        benchmark_versions_orm = await self.repository.get_all()
+    async def get_all(
+        self,
+        *expressions,
+        **filters,
+    ) -> list[BenchmarkVersionReadSchema]:
+        benchmark_versions_orm = await self.repository.get_all(*expressions, **filters)
         return [
             BenchmarkVersionReadSchema.model_validate(task_orm)
             for task_orm in benchmark_versions_orm
         ]
+
+    async def get_one_or_none(
+        self,
+        *expressions,
+        **filters,
+    ) -> BenchmarkVersionReadSchema | None:
+        benchmark_version_orm = await self.repository.get_one_or_none(
+            *expressions,
+            **filters,
+        )
+        if benchmark_version_orm is None:
+            return None
+
+        return BenchmarkVersionReadSchema.model_validate(benchmark_version_orm)
 
     async def get_by_id(self, benchmark_version_id: int) -> BenchmarkVersionReadSchema:
         benchmark_version_orm = await self.repository.get_by_id(benchmark_version_id)

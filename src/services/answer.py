@@ -41,8 +41,8 @@ class AnswerService:
         await self.session.commit()
         return AnswerReadSchema.model_validate(answer_orm)
 
-    async def get_all_answers(self) -> list[AnswerReadSchema]:
-        answers_orm = await self.repository.get_all()
+    async def get_all_answers(self, *expressions, **filters) -> list[AnswerReadSchema]:
+        answers_orm = await self.repository.get_all(*expressions, **filters)
         return [
             AnswerReadSchema.model_validate(answer_orm) for answer_orm in answers_orm
         ]
