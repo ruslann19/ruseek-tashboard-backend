@@ -14,9 +14,9 @@ class LlmAlreadyExists(Exception):
 
 
 class LlmService:
-    def __init__(self, repository: LlmRepository, session: AsyncSession) -> None:
-        self.repository = repository
+    def __init__(self, session: AsyncSession) -> None:
         self.session = session
+        self.repository = LlmRepository(session)
 
     async def add_llm(self, llm: LlmCreateSchema) -> LlmReadSchema:
         try:

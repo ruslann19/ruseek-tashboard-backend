@@ -2,14 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.session import get_async_session
-from repositories import TaskRepository
 from schemas import (
     BenchmarkVersionCreateSchema,
     TaskCreateCoreSchema,
     TaskReadSchema,
     TaskUpdateSchema,
 )
-from services import TaskServise
+from services import TaskService
 from services.task import TaskNotFound
 
 router = APIRouter(
@@ -18,12 +17,8 @@ router = APIRouter(
 )
 
 
-async def get_task_repository(session: AsyncSession = Depends(get_async_session)):
-    return TaskRepository(session)
-
-
-async def get_task_service(repository: TaskRepository = Depends(get_task_repository)):
-    return TaskServise(repository, repository.session)
+async def get_task_service(session: AsyncSession = Depends(get_async_session)):
+    return TaskService(session)
 
 
 @router.post(
@@ -33,7 +28,7 @@ async def get_task_service(repository: TaskRepository = Depends(get_task_reposit
 )
 async def create_task(
     task: TaskCreateCoreSchema,
-    task_service: TaskServise = Depends(get_task_service),
+    task_service: TaskService = Depends(get_task_service),
 ):
     return await task_service.add_task(task)
 
@@ -44,7 +39,7 @@ async def create_task(
     summary="Получить все задачи",
 )
 async def get_tasks(
-    task_service: TaskServise = Depends(get_task_service),
+    task_service: TaskService = Depends(get_task_service),
 ):
     return await task_service.get_all_tasks()
 
@@ -57,7 +52,7 @@ async def get_tasks(
 async def get_tasks_by_month(
     year: int,
     month: int,
-    task_service: TaskServise = Depends(get_task_service),
+    task_service: TaskService = Depends(get_task_service),
 ):
     return await task_service.get_tasks_by_month(year, month)
 
@@ -68,7 +63,7 @@ async def get_tasks_by_month(
     summary="Получить список версий бенчмарка (имеющихся и потенциальных)",
 )
 async def get_benchmark_versions(
-    task_service: TaskServise = Depends(get_task_service),
+    task_service: TaskService = Depends(get_task_service),
 ):
     return await task_service.get_benchmark_versions()
 
@@ -80,7 +75,7 @@ async def get_benchmark_versions(
 )
 async def get_task(
     task_id: int,
-    task_service: TaskServise = Depends(get_task_service),
+    task_service: TaskService = Depends(get_task_service),
 ):
     try:
         return await task_service.get_task_by_id(task_id)
@@ -98,7 +93,7 @@ async def get_task(
 )
 async def update_task(
     task_for_update: TaskUpdateSchema,
-    task_service: TaskServise = Depends(get_task_service),
+    task_service: TaskService = Depends(get_task_service),
 ):
     await task_service.update_task(task_for_update)
 
@@ -110,6 +105,6 @@ async def update_task(
 )
 async def delete_task(
     task_id: int,
-    task_service: TaskServise = Depends(get_task_service),
+    task_service: TaskService = Depends(get_task_service),
 ):
     await task_service.delete_task(task_id)

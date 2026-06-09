@@ -3,20 +3,13 @@ from pydantic_core import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.session import get_async_session
-from repositories import AnswerRepository
 from schemas import AnswerReadSchema, BenchmarkVersionCreateSchema
 from services import AnswerService
 from services.answer import AnswerNotFound
 
 
-async def get_answer_repository(session: AsyncSession = Depends(get_async_session)):
-    return AnswerRepository(session)
-
-
-async def get_answer_service(
-    repository: AnswerRepository = Depends(get_answer_repository),
-):
-    return AnswerService(repository, repository.session)
+async def get_answer_service(session: AsyncSession = Depends(get_async_session)):
+    return AnswerService(session)
 
 
 router = APIRouter(

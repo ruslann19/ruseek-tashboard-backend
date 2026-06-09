@@ -19,10 +19,10 @@ class TaskNotFound(Exception):
     """Задача не найдена"""
 
 
-class TaskServise:
-    def __init__(self, repository: TaskRepository, session: AsyncSession) -> None:
-        self.repository = repository
+class TaskService:
+    def __init__(self, session: AsyncSession) -> None:
         self.session = session
+        self.repository = TaskRepository(session)
 
     async def add_task(self, task: TaskCreateCoreSchema) -> TaskReadSchema:
         task_full = TaskCreateSchema.model_validate(task)

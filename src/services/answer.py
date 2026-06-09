@@ -14,7 +14,7 @@ from schemas import (
 )
 
 from .llm import LlmService
-from .task import TaskServise
+from .task import TaskService
 
 
 class AnswerNotFound(Exception):
@@ -22,18 +22,16 @@ class AnswerNotFound(Exception):
 
 
 class AnswerService:
-    def __init__(self, repository: AnswerRepository, session: AsyncSession) -> None:
-        self.repository = repository
+    def __init__(self, session: AsyncSession) -> None:
         self.session = session
+        self.repository = AnswerRepository(session)
 
     async def add_answer(self, answer: AnswerCreateSchema) -> AnswerReadSchema:
-        task_repository = TaskRepository(self.session)
-        task_service = TaskServise(task_repository, self.session)
+        task_service = TaskService(self.session)
         # Если задача не найдётся, то выбростися исключение TaskNotFound
         await task_service.get_task_by_id(answer.task_id)
 
-        llm_repository = LlmRepository(self.session)
-        llm_service = LlmService(llm_repository, self.session)
+        llm_service = LlmService(self.session)
         # Если задача не найдётся, то выбростися исключение LLMNotFound
         await llm_service.get_llm_by_id(answer.llm_id)
 

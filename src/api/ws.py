@@ -15,7 +15,6 @@ from llm_clients import (
     MockLlmClient,
     RouterAiClient,
 )
-from repositories import AnswerRepository, BenchmarkVersionRepository, TaskRepository
 from schemas import (
     AnswerCreateSchema,
     AnswerUpdateSchema,
@@ -26,7 +25,7 @@ from schemas import (
     VerificationRequest,
     YourOwnGameMetadata,
 )
-from services import AnswerService, BenchmarkVersionServise, TaskServise
+from services import AnswerService, BenchmarkVersionService, TaskService
 from utils.html_processing import get_raw_text
 from utils.parse_tasks import parse_tasks
 
@@ -60,8 +59,7 @@ async def collect_tasks(websocket: WebSocket):
             return
 
         async with async_session_maker() as session:
-            repository = TaskRepository(session)
-            task_service = TaskServise(repository, session)
+            task_service = TaskService(session)
 
             async for task in parse_tasks(text, game_metadata):
                 added_task = await task_service.add_task(task)
@@ -94,10 +92,7 @@ async def test_llms(websocket: WebSocket):
     selected_llms = [LlmReadSchema(**llm) for llm in received_data["selected_llms"]]
 
     async with async_session_maker() as session:
-        benchmark_version_repository = BenchmarkVersionRepository(session)
-        benchmark_version_service = BenchmarkVersionServise(
-            benchmark_version_repository, session
-        )
+        benchmark_version_service = BenchmarkVersionService(session)
 
         added_benchmark_version = await benchmark_version_service.add(benchmark_version)
 
@@ -147,8 +142,7 @@ async def update_benchmark_version(websocket: WebSocket):
 
     # Удаляем то, что удалили
     async with async_session_maker() as session:
-        answer_repository = AnswerRepository(session)
-        answer_service = AnswerService(answer_repository, session)
+        answer_service = AnswerService(session)
 
         answers_for_delete = []
 
@@ -168,10 +162,7 @@ async def update_benchmark_version(websocket: WebSocket):
             await answer_service.delete_answer(answer.id)
 
         # Загружаем версию бенчмарка (вместе с id)
-        benchmark_version_repository = BenchmarkVersionRepository(session)
-        benchmark_version_service = BenchmarkVersionServise(
-            benchmark_version_repository, session
-        )
+        benchmark_version_service = BenchmarkVersionService(session)
         loaded_benchmark_version = await benchmark_version_service.get_one_or_none(
             year=benchmark_version.year,
             month=benchmark_version.month,
@@ -245,8 +236,7 @@ async def run_pipline(
     session: AsyncSession,
     websocket: WebSocket,
 ) -> None:
-    answer_repository = AnswerRepository(session)
-    answer_service = AnswerService(answer_repository, session)
+    answer_service = AnswerService(session)
 
     # TODO: вернуть реального клиента
     llm_client = MockLlmClient()

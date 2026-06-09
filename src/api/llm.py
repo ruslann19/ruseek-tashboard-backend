@@ -3,7 +3,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.session import get_async_session
 from external_api import RouterAiApi
-from repositories import LlmRepository
 from schemas.llm import LlmCreateSchema, LlmReadSchema, LlmUpdateSchema
 from services import LlmService
 from services.llm import LlmAlreadyExists, LlmNotFound
@@ -14,12 +13,8 @@ router = APIRouter(
 )
 
 
-async def get_llm_repository(session: AsyncSession = Depends(get_async_session)):
-    return LlmRepository(session)
-
-
-async def get_llm_service(repository: LlmRepository = Depends(get_llm_repository)):
-    return LlmService(repository, repository.session)
+async def get_llm_service(session: AsyncSession = Depends(get_async_session)):
+    return LlmService(session)
 
 
 @router.post(

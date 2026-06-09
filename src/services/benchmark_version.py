@@ -8,14 +8,13 @@ class BenchmarkVersionNotFound(Exception):
     """Версия бенчмарка не найдена"""
 
 
-class BenchmarkVersionServise:
+class BenchmarkVersionService:
     def __init__(
         self,
-        repository: BenchmarkVersionRepository,
         session: AsyncSession,
     ) -> None:
-        self.repository = repository
         self.session = session
+        self.repository = BenchmarkVersionRepository(session)
 
     async def add(
         self,
