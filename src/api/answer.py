@@ -1,13 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic_core import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.session import get_async_session
 from repositories import AnswerRepository
-from schemas.answer import AnswerCreateSchema, AnswerReadSchema, AnswerUpdateSchema
+from schemas import AnswerReadSchema, BenchmarkVersionCreateSchema
 from services import AnswerService
 from services.answer import AnswerNotFound
-from services.llm import LlmNotFound
-from services.task import TaskNotFound
 
 
 async def get_answer_repository(session: AsyncSession = Depends(get_async_session)):
@@ -53,3 +52,24 @@ async def get_answer_by_id(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Ответ не найден",
         )
+
+
+@router.get(
+    path="/by-benchmark-version",
+    response_model=list[AnswerReadSchema],
+    summary="Получить все ответы в конкретной версии бенчмарка",
+)
+async def get_all_by_benchmark_version(
+    year: int,
+    month: int,
+    answer_service: AnswerService = Depends(get_answer_service),
+):
+    try:
+        benchmark_version = BenchmarkVersionCreateSchema(year=year, month=month)
+    except ValidationError as error:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=error.errors()[0],
+        )
+
+    return await answer_service.get_all_by_benchmark_version(benchmark_version)

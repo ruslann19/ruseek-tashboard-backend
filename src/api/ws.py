@@ -137,7 +137,7 @@ async def test_llms(websocket: WebSocket):
     await websocket.close()
 
     # TODO: убрать это (удаление созданной версии бенчмарка)
-    await benchmark_version_service.delete(added_benchmark_version.id)
+    # await benchmark_version_service.delete(added_benchmark_version.id)
 
 
 def create_question_with_header(question: str) -> str:
