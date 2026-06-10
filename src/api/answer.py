@@ -1,9 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic_core import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.session import get_async_session
-from schemas import AnswerReadSchema, BenchmarkVersionCreateSchema
+from schemas import AnswerReadSchema
 from services import AnswerService
 from services.answer import AnswerNotFound
 
@@ -30,27 +29,6 @@ async def get_answers(
 
 
 @router.get(
-    path="/by-benchmark-version",
-    response_model=list[AnswerReadSchema],
-    summary="Получить все ответы в конкретной версии бенчмарка",
-)
-async def get_all_by_benchmark_version(
-    year: int,
-    month: int,
-    answer_service: AnswerService = Depends(get_answer_service),
-):
-    try:
-        benchmark_version = BenchmarkVersionCreateSchema(year=year, month=month)
-    except ValidationError as error:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=error.errors()[0],
-        )
-
-    return await answer_service.get_all_by_benchmark_version(benchmark_version)
-
-
-@router.get(
     "/{answer_id}",
     response_model=AnswerReadSchema,
     summary="Получить конкретный ответ по ID",
@@ -66,3 +44,15 @@ async def get_answer_by_id(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Ответ не найден",
         )
+
+
+@router.get(
+    path="/by-benchmark-version/{benchmark_version_id}",
+    response_model=list[AnswerReadSchema],
+    summary="Получить все ответы в конкретной версии бенчмарка",
+)
+async def get_answers_by_benchmark_version(
+    benchmark_version_id: int,
+    answer_service: AnswerService = Depends(get_answer_service),
+):
+    return await answer_service.get_all_by_benchmark_version(benchmark_version_id)

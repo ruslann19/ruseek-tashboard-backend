@@ -1,17 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from repositories import (
-    AnswerRepository,
-    BenchmarkVersionRepository,
-    LlmRepository,
-    TaskRepository,
-)
-from schemas import (
-    AnswerCreateSchema,
-    AnswerReadSchema,
-    AnswerUpdateSchema,
-    BenchmarkVersionCreateSchema,
-)
+from repositories import AnswerRepository
+from schemas import AnswerCreateSchema, AnswerReadSchema, AnswerUpdateSchema
 
 from .llm import LlmService
 from .task import TaskService
@@ -47,19 +37,10 @@ class AnswerService:
 
     async def get_all_by_benchmark_version(
         self,
-        benchmark_version: BenchmarkVersionCreateSchema,
+        benchmark_version_id: int,
     ) -> list[AnswerReadSchema]:
-        benchmark_version_repository = BenchmarkVersionRepository(self.session)
-        benchmark_version_orm = await benchmark_version_repository.get_one_or_none(
-            year=benchmark_version.year,
-            month=benchmark_version.month,
-        )
-
-        if benchmark_version_orm is None:
-            return []
-
         answers_orm = await self.repository.get_all(
-            benchmark_version_id=benchmark_version_orm.id
+            benchmark_version_id=benchmark_version_id
         )
         return [
             AnswerReadSchema.model_validate(answer_orm) for answer_orm in answers_orm
