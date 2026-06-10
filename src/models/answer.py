@@ -1,4 +1,4 @@
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base
@@ -20,4 +20,8 @@ class AnswerOrm(Base):
     llm: Mapped[list["LlmOrm"]] = relationship(back_populates="answers")  # noqa: F821
     benchmark_version: Mapped[list["BenchmarkVersionOrm"]] = relationship(  # noqa: F821
         back_populates="answers"
+    )
+
+    __table_args__ = (
+        UniqueConstraint("id", "task_id", "llm_id", name="uq_answer_id_task_llm"),
     )
