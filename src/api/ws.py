@@ -25,6 +25,8 @@ from services import AnswerService, BenchmarkVersionService, TaskService
 from utils.html_processing import get_raw_text
 from utils.parse_tasks import parse_tasks
 
+SLEEP_BEETWEEN_PIPLINES = 0.15
+
 router = APIRouter(
     prefix="/ws",
     tags=["Вебсокет"],
@@ -97,6 +99,8 @@ async def test_llms(websocket: WebSocket):
 
     for task in selected_tasks:
         for llm in selected_llms:
+            await asyncio.sleep(SLEEP_BEETWEEN_PIPLINES)
+
             pipeline = asyncio.create_task(
                 run_pipline(
                     llm_schema=llm,
@@ -165,6 +169,8 @@ async def update_benchmark_version(websocket: WebSocket):
 
     for task in old_tasks:
         for llm in new_llms:
+            await asyncio.sleep(SLEEP_BEETWEEN_PIPLINES)
+
             pipeline = asyncio.create_task(
                 run_pipline(
                     llm_schema=llm,
@@ -181,6 +187,8 @@ async def update_benchmark_version(websocket: WebSocket):
 
     for task in new_tasks:
         for llm in all_testing_llms:
+            await asyncio.sleep(SLEEP_BEETWEEN_PIPLINES)
+
             pipeline = asyncio.create_task(
                 run_pipline(
                     llm_schema=llm,
@@ -224,53 +232,59 @@ async def run_pipline(
     judge: Judge,
     websocket: WebSocket,
 ) -> None:
+    llm_client = get_router_ai_client(model=llm_schema.llm_name)
+
+    formatted_question = create_question_with_header(task.question)
     try:
-        llm_client = get_router_ai_client(model=llm_schema.llm_name)
-
-        formatted_question = create_question_with_header(task.question)
         llm_answer = await llm_client.ask(formatted_question)
-
-        async with async_session_maker() as session:
-            answer_service = AnswerService(session)
-
-            answer = AnswerCreateSchema(
-                task_id=task.id,
-                llm_id=llm_schema.id,
-                benchmark_version_id=benchmark_version.id,
-                llm_answer=llm_answer,
-            )
-            added_answer = await answer_service.add_answer(answer)
-
-            message = ProgressInfo(
-                progress_type="asking",
-                task_id=task.id,
-                tested_llm_id=llm_schema.id,
-            )
-            await websocket.send_text(message.model_dump_json())
-
-            verification_request = VerificationRequest(
-                question=task.question,
-                correct_answer=task.correct_answer,
-                llm_answer=llm_answer,
-            )
-            verification_response = await judge.verify(verification_request)
-
-            if verification_response.verdict != "FORMAT_ERROR":
-                added_answer.is_correct = verification_response.verdict == "RIGHT"
-
-            added_answer.judge_explaination = verification_response.explaination
-
-            answer_data_for_update = AnswerUpdateSchema.model_validate(
-                added_answer.model_dump()
-            )
-            await answer_service.update_answer(answer_data_for_update)
-
-            message = ProgressInfo(
-                progress_type="verification",
-                task_id=task.id,
-                tested_llm_id=llm_schema.id,
-            )
-            await websocket.send_text(message.model_dump_json())
-
     except Exception as error:
-        print(f"Ошибка в пайплайне для LLM {llm_schema.id} и задачи {task.id}: {error}")
+        print(
+            f"Ошибка в использовании LLM - LLM: {llm_schema.id}, задача {task.id}, ошибка: {error}"
+        )
+        return
+
+    async with async_session_maker() as session:
+        answer_service = AnswerService(session)
+
+        answer = AnswerCreateSchema(
+            task_id=task.id,
+            llm_id=llm_schema.id,
+            benchmark_version_id=benchmark_version.id,
+            llm_answer=llm_answer,
+        )
+        added_answer = await answer_service.add_answer(answer)
+
+        message = ProgressInfo(
+            progress_type="asking",
+            task_id=task.id,
+            tested_llm_id=llm_schema.id,
+        )
+        await websocket.send_text(message.model_dump_json())
+
+        verification_request = VerificationRequest(
+            question=task.question,
+            correct_answer=task.correct_answer,
+            llm_answer=llm_answer,
+        )
+        try:
+            verification_response = await judge.verify(verification_request)
+        except Exception as error:
+            print(f"Ошибка LLM-as-a-Judge: {error}")
+            return
+
+        if verification_response.verdict != "FORMAT_ERROR":
+            added_answer.is_correct = verification_response.verdict == "RIGHT"
+
+        added_answer.judge_explaination = verification_response.explaination
+
+        answer_data_for_update = AnswerUpdateSchema.model_validate(
+            added_answer.model_dump()
+        )
+        await answer_service.update_answer(answer_data_for_update)
+
+        message = ProgressInfo(
+            progress_type="verification",
+            task_id=task.id,
+            tested_llm_id=llm_schema.id,
+        )
+        await websocket.send_text(message.model_dump_json())
