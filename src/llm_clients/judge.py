@@ -5,7 +5,7 @@ import instructor
 from instructor.core.exceptions import InstructorRetryException
 from openai import AsyncOpenAI
 
-from core.config import settings
+from core.config import running_modes, settings
 from schemas.verification import (
     VerificationRequest,
     VerificationResponse,
@@ -82,3 +82,10 @@ class LlmJudge(Judge):
                     explaination="Не удалось получить ответ от LLM-as-a-judge в нужном формате",
                     verdict="FORMAT_ERROR",
                 )
+
+
+def get_judge() -> Judge:
+    if settings.RUNNING_MODE == running_modes.dev:
+        return MockJudge()
+    elif settings.RUNNING_MODE == running_modes.prod:
+        return LlmJudge()

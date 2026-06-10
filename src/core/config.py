@@ -5,8 +5,23 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+class RunningModes:
+    def __init__(self):
+        self.dev = "dev"
+        self.prod = "prod"
+
+    @property
+    def values(self):
+        return list(self.__dict__.values())
+
+
+running_modes = RunningModes()
+
+
 class Settings:
     def __init__(self):
+        self.RUNNING_MODE = os.getenv("RUNNING_MODE")
+
         self.OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
         self.DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
         self.ROUTERAI_API_KEY = os.getenv("ROUTERAI_API_KEY")
@@ -21,3 +36,7 @@ class Settings:
 
 
 settings = Settings()
+
+
+# RUNNING_MODE должен соответствовать определённому значению из списка
+assert settings.RUNNING_MODE in running_modes.values

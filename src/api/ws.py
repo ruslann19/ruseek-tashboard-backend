@@ -8,8 +8,8 @@ from pydantic import BaseModel, ConfigDict
 from db.session import async_session_maker
 from llm_clients import (
     Judge,
-    MockJudge,
-    MockLlmClient,
+    get_judge,
+    get_router_ai_client,
 )
 from schemas import (
     AnswerCreateSchema,
@@ -92,9 +92,7 @@ async def test_llms(websocket: WebSocket):
 
         added_benchmark_version = await benchmark_version_service.add(benchmark_version)
 
-    # TODO: вернуть реального судью
-    judge = MockJudge()
-    # judge = LlmJudge()
+    judge = get_judge()
     pipelines = []
 
     for task in selected_tasks:
@@ -162,9 +160,7 @@ async def update_benchmark_version(websocket: WebSocket):
             month=benchmark_version.month,
         )
 
-    # TODO: вернуть реального судью
-    judge = MockJudge()
-    # judge = LlmJudge()
+    judge = get_judge()
     pipelines = []
 
     for task in old_tasks:
@@ -229,9 +225,7 @@ async def run_pipline(
     websocket: WebSocket,
 ) -> None:
     try:
-        # TODO: вернуть реального клиента
-        llm_client = MockLlmClient()
-        # llm_client = RouterAiClient(model=llm.llm_name)
+        llm_client = get_router_ai_client(model=llm_schema.llm_name)
 
         formatted_question = create_question_with_header(task.question)
         llm_answer = await llm_client.ask(formatted_question)

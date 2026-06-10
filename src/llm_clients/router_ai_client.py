@@ -2,9 +2,9 @@ import asyncio
 
 from openai import AsyncOpenAI
 
-from core.config import settings
+from core.config import running_modes, settings
 
-from .llm_client import LlmClient
+from .llm_client import LlmClient, MockLlmClient
 
 
 class RouterAiClient(LlmClient):
@@ -44,3 +44,10 @@ class RouterAiClient(LlmClient):
                 stream=False,
             )
             return response.choices[0].message.content
+
+
+def get_router_ai_client(model: str) -> LlmClient:
+    if settings.RUNNING_MODE == running_modes.dev:
+        return MockLlmClient()
+    elif settings.RUNNING_MODE == running_modes.prod:
+        return RouterAiClient(model=model)
