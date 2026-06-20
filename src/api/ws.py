@@ -59,6 +59,17 @@ async def collect_tasks(websocket: WebSocket):
         async with async_session_maker() as session:
             task_service = TaskService(session)
 
+            all_tasks = await task_service.get_all_tasks()
+            all_source_urls = [task.source_url for task in all_tasks]
+            unique_source_url = set(all_source_urls)
+
+            if game_metadata.source_url in unique_source_url:
+                ws_message["type"] = WS_MESSAGE_ERROR
+                ws_message["content"] = str("Данный Source URL уже есть в базе данных")
+                await websocket.send_text(json.dumps(ws_message))
+                await websocket.close()
+                return
+
             async for task in parse_tasks(text, game_metadata):
                 added_task = await task_service.add_task(task)
 
