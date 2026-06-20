@@ -11,6 +11,7 @@ from api import (
     task_router,
     ws_router,
 )
+from core.config import settings
 from db.session import engine
 from models import Base
 
@@ -31,9 +32,9 @@ app.include_router(ws_router)
 app.include_router(balance_router)
 app.include_router(benchmark_version_router)
 
-origins = [
-    "http://localhost:9000",
-]
+origins = ["http://localhost:9000", settings.FRONTEND_HOST]
+
+print(origins)
 
 app.add_middleware(
     CORSMiddleware,

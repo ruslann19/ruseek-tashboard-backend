@@ -22,6 +22,8 @@ class Settings:
     def __init__(self):
         self.RUNNING_MODE = os.getenv("RUNNING_MODE")
 
+        self.FRONTEND_HOST = os.getenv("FRONTEND_HOST")
+
         self.OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
         self.DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
         self.ROUTERAI_API_KEY = os.getenv("ROUTERAI_API_KEY")
