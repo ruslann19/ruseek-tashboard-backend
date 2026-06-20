@@ -12,7 +12,7 @@ class RouterAiBalanceResponse(BaseModel):
 class RouterAiApi:
     def __init__(self):
         self.headers = {
-            "Authorization": settings.ROUTERAI_API_KEY,
+            "Authorization": f"Bearer {settings.ROUTERAI_API_KEY}",
         }
 
     async def get(self, url: str) -> Response:
