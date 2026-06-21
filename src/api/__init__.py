@@ -1,4 +1,5 @@
 from .answer import router as answer_router
+from .auth import router as auth_router
 from .balance import router as balance_router
 from .benchmark_version import router as benchmark_version_router
 from .llm import router as llm_router

@@ -36,6 +36,11 @@ class Settings:
 
         self.DB_URL = f"postgresql+asyncpg://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
 
+        self.JWT_SECRET = os.getenv("JWT_SECRET")
+        self.ALGORITHM = os.getenv("ALGORITHM")
+        self.CORRECT_PASSWORD = os.getenv("CORRECT_PASSWORD")
+        self.SESSION_TIMEOUT_MINUTES = int(os.getenv("SESSION_TIMEOUT_MINUTES"))
+
 
 settings = Settings()
 

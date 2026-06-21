@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from api import (
     answer_router,
+    auth_router,
     balance_router,
     benchmark_version_router,
     llm_router,
@@ -31,11 +32,14 @@ app.include_router(answer_router)
 app.include_router(ws_router)
 app.include_router(balance_router)
 app.include_router(benchmark_version_router)
+app.include_router(auth_router)
 
 origins = ["http://localhost:9000", settings.FRONTEND_HOST]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
+    allow_credentials=True,
     allow_methods=["*"],
+    allow_headers=["*"],
 )
