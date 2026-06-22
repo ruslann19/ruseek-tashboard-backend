@@ -11,6 +11,7 @@
 Для развертывания и запуска приложения необходимы:
 * **Docker**
 * **Docker Compose**
+* **Файл конфигурации `.env`** в корне проекта
 
 ---
 
@@ -24,7 +25,13 @@ git clone https://github.com/ruslann19/ruseek-tashboard-backend.git
 cd ruseek-tashboard-backend
 ```
 
-2. Запустите сборку и контейнеры в фоновом режиме:
+2. Создайте файл `.env` в корневом каталоге и настройте переменные окружения. Вы можете использовать готовый пример для быстрой настройки:
+```bash
+cp .env.example .env
+```
+Ссылка на файл с примером: [.env.example](https://github.com/ruslann19/ruseek-tashboard-backend/blob/main/.env.example)
+
+3. Запустите сборку и контейнеры в фоновом режиме:
 ```bash
 docker compose up --build -d
 ```
