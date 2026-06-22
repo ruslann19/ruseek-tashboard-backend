@@ -34,7 +34,7 @@ app.include_router(balance_router)
 app.include_router(benchmark_version_router)
 app.include_router(auth_router)
 
-origins = ["http://localhost:9000", settings.FRONTEND_HOST]
+origins = ["http://localhost", settings.FRONTEND_HOST]
 
 app.add_middleware(
     CORSMiddleware,
